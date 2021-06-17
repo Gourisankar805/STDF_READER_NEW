@@ -7,6 +7,7 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import (QInputDialog,QFileDialog,QMessageBox,QWidget)
 import pandas as pd
 from pandas import DataFrame as DF
 class Ui_Insert_Rows(QtWidgets.QDialog):
@@ -108,7 +109,12 @@ class Ui_Insert_Rows(QtWidgets.QDialog):
         self.New_File_Name,self.Ok_pressed=QtWidgets.QInputDialog.getText(self,'Rename Table','Enter the New name',QtWidgets.QLineEdit.Normal,'')
         if self.Parent_window!=None and self.Ok_pressed==True and self.New_File_Name !='' :
             self.File1=self.Add_rows_to_combo.currentText()
-            self.File2=self.lineEdit.text()            
+            self.File2=self.lineEdit.text()
+            try:self.File1_Limit_file=DF(self.Parent_window.Loaded_Data_Files[self.File1]['Test_Limit_Details'])
+            except:self.File1_Limit_file=DF()
+            try:self.File2_Limit_file=DF(self.Parent_window.Loaded_Data_Files[self.File2]['Test_Limit_Details'])           
+            except:self.File2_Limit_file=DF()
+
             self.File1_DF=DF(self.Parent_window.Loaded_Data_File_Raw_Data[self.File1])
             if self.File2!="" and self.File2!='Select': self.File2_DF=DF(self.Parent_window.Loaded_Data_File_Raw_Data[self.File2])
             if self.File1_DF.empty==False and self.File2_DF.empty==False:
@@ -118,10 +124,23 @@ class Ui_Insert_Rows(QtWidgets.QDialog):
                 for name in Temp_file.columns:  Temp_file1[name]=list(Temp_file[name])
                 self.Parent_window.Loaded_Data_Files[self.New_File_Name]={'Full_Rec_Summary':Temp_file1}
                 self.Parent_window.Loaded_Data_File_count.append(self.New_File_Name)
-                self.Parent_window.Loaded_Data_File_Raw_Data[self.New_File_Name]=DF(Temp_file1)     
+                self.Parent_window.Loaded_Data_File_Raw_Data[self.New_File_Name]=DF(Temp_file1)                    
                 self.Parent_window.Refresh_data_table_items()   
                 self.Close_the_insert_row_window()
-        elif self.Ok_pressed==True and self.New_File_Name =='' :
+            if self.File1_Limit_file.empty==False and self.File2_Limit_file.empty==False:
+                Temp2_file=pd.concat([self.File1_Limit_file,self.File2_Limit_file], axis=1, join='inner')
+                # Converting the DF to Dict for use
+                Temp2_file1={}
+                for name in Temp2_file.columns:  Temp2_file1[name]=list(Temp2_file[name])
+                Temp2_file1['TestNumber;Name'].append('')
+                self.Parent_window.Loaded_Data_Files[self.New_File_Name]['Test_Limit_Details']=Temp2_file1
+                #self.Parent_window.Loaded_Data_File_count.append(self.New_File_Name)
+                #Temp2_file1['TestNumber;Name'].append('')
+                self.Parent_window.Loaded_Data_File_Raw_Data[self.New_File_Name]=DF(Temp2_file1)                    
+                self.Parent_window.Refresh_data_table_items()   
+                self.Close_the_insert_row_window()
+
+        elif self.Ok_pressed==True and self.New_File_Name =='':
             self.Parent_window.Messagebox('Enter the file name','info','Please enter the name')
     def Merge_the_data_frames(self,File1,File2):
         New_Data_with_merged=''
@@ -140,7 +159,7 @@ class Ui_Insert_Rows(QtWidgets.QDialog):
                 print(" Merging of the 2 files was unsucessful :-( , Please try again")            
             else:
                 print(' Please give a valid input')
-        return New_Data_with_merged
+        return New_Data_with_merged    
     
 class Ui_Insert_Rows_Mismatched_column_window(QtWidgets.QDialog):
     def __init__(self,parent=None):

@@ -77,7 +77,7 @@ def plot_hist(Groupedvariable,TestNumber):
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), borderaxespad=0., prop={'size': 10})
     elif len(np.unique(sheet_1[boxgroupedx]))>9:
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), borderaxespad=0., prop={'size': 6})     
-    plt.grid(True)  
+    plt.grid(True)
     maxvalue=Groupedvariable.count().max()
     maxvalue1=maxvalue
     hilimt=float(sheet_2[TestNumbers[TestNumber]][5])
@@ -93,7 +93,7 @@ def plot_hist(Groupedvariable,TestNumber):
         NewCPK=Textbox4.get();NewCPK=float(NewCPK)
         if Table2[0][11]<NewCPK and Table2[0][9]!=0:
             Cal_USL=round(Table2[0][7]+(3*Table2[0][9]*NewCPK),5)
-            Cal_LSL=round(Table2[0][7]-(3*Table2[0][9]*NewCPK),5)            
+            Cal_LSL=round(Table2[0][7]-(3*Table2[0][9]*NewCPK),5)
             new_hi_y=[float(Cal_USL),float(Cal_USL)]
             new_lo_y=[float(Cal_LSL),float(Cal_LSL)]
             if Table2[0][12]<NewCPK:
@@ -380,7 +380,7 @@ def Generate_plots():
                         
                         #Parametric table at the bottom
                         c=[0.05, 0.09, 0.05, 0.05, 0.02, 0.05, 0.05, 0.05, 0.05, 0.05,0.05,0.05,0.05,0.05]
-                        DataTable=plt.table(cellText=Table2,colLabels=Table1,colWidths=c,cellLoc='left',colLoc='left',loc='bottom',bbox=[-0.08, -0.24,1.2,0.1])
+                        DataTable=plt.table(cellText=Table2,colLabels=Table1,colWidths=c,cellLoc='left',colLoc='left',loc='bottom',bbox=[-0.08,-0.24,1.2,0.1])
                         #DataTable=plt.table(cellText=Table2,colLabels=Table1,colWidths=c,loc='bottom',bbox=[0.25, -0.3, 0.5, 0.3])
                         DataTable.auto_set_font_size(False)
                         #DataTable.set_fontsize(5.5)
@@ -388,7 +388,7 @@ def Generate_plots():
                         DataTable.scale(4,4)
                         DataTable.auto_set_column_width(True)                        
                         #Header
-                        Table6=['TESSOLVE SEMICONDUCTOR PVT LTD',"PageNumber"]
+                        Table6=['GOURISANKAR_TOOL',"PageNumber"]
                         Table7=[['Characterization Report',i-25]]
                         Header_table= plt.table(cellText=Table7,colLabels=Table6,cellLoc='center',colLoc='center',loc='top',bbox=[-0.08, 1.06,1.2,0.08])
                         Header_table.set_fontsize(16)
@@ -463,7 +463,7 @@ def Generate_plots():
                         DataTable.scale(4,4)
                         DataTable.auto_set_column_width(True)
                         #Header
-                        Table6=['TESSOLVE SEMICONDUCTOR PVT LTD',"PageNumber"]
+                        Table6=['GOURISANKAR_TOOL',"PageNumber"]
                         Table7=[['Characterization Report',i-25]]                        
                         Header_table= plt.table(cellText=Table7,colLabels=Table6,cellLoc='center',colLoc='center',loc='top',bbox=[-0.08, 2.32,1.2,0.15])#,bbox=[-0.08, 3.61,1.2,0.22]
                         Header_table.set_fontsize(16)
@@ -515,7 +515,7 @@ def Generate_plots():
                         DataTable.scale(4,4)
                         DataTable.auto_set_column_width(True) 
                         #Header
-                        Table6=['TESSOLVE SEMICONDUCTOR PVT LTD',"PageNumber"]
+                        Table6=['GOURISANKAR_TOOL',"PageNumber"]
                         Table7=[['Characterization Report',i-25]]                        
                         Header_table= plt.table(cellText=Table7,colLabels=Table6,cellLoc='center',colLoc='center',loc='top',bbox=[-0.08, 3.61,1.2,0.22])#,bbox=[0, 3.61,1,0.22])
                         Header_table.auto_set_font_size(False)

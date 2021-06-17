@@ -1,0 +1,3 @@
+AuxDfile,Burntime,DDrev,DateCode,EnggId,ExSwtype,ExSwver,FabPId,FacilId,File_Name,FloorId,FlowId,GenUTest,Jobname,Jobrev,Lotid,NodName,OpFreq,Opername,PFid,Parttype,Pcktyp,RomCode,Serl_Num,SetupId,Setuptime,Stat_Num,Strtuptime,Sublotid,Supr_Nam,TestCode,TestSpecVerName,TestTemp,TesterType,cmodcode,modcode,protcode,retestcode
+,65535,,,,93000,"s/w rev. 6.5.4.8 (E), 07-Oct-11
+",,ATC,D:/2360/Scripting_data/Python_trail/GIT_HUB/Tool/STDF-READER-/Input_to_clear/Raw data/W649X219_RT1_C633Y5F0301_7DBS5V_TS-HP9-014_20161206014854.stdf,,,,DS516VBR03p1CR.prg,/home/prod339/workorder/DS5FT,W649X219,HP9-Linux14,,58003,,7DBS5V,,,,,1480988934,1,1480988984,,,,,ROOM,93000-SOC, , , ,N

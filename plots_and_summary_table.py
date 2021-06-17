@@ -14,49 +14,101 @@ class generate_plots_with_summary_table:
     def __init__(self,parent=None):
         self.Parent_window=parent
 
-    def Plot_Histogram(self,Raw_data,Group_by_variable,Test_no_name):
-            if len(Group_by_variable)!=0:Grouped_data=self.Raw_Data.groupby(Group_by_variable[0])
-            elif len(Group_by_variable)==0:Grouped_data=self.Raw_Data
+    def Plot_Histogram(self,Raw_Data,Grouping_column_name,Test_no_name):
+            ''' This Function used to Generate the Histogram plot if we provide mandotary items Dataframe name, Column name for which we need to plot the 
+        graph and the grouping column if you have any'''
+            if type(Grouping_column_name)==str: Grouping_column_name=[Grouping_column_name]
+            if len(Grouping_column_name)!=0:
+                Grouped_data=Raw_Data.groupby(Grouping_column_name[0])
+                List_of_variables_for_grouping=[i for i in Raw_Data[Grouping_column_name[0]].unique()]
+            elif len(Grouping_column_name)==0:
+                Grouped_data=Raw_Data;List_of_variables_for_grouping=None
             Grouped_data[Test_no_name].plot(kind='hist', alpha=1, legend=True,edgecolor ='black',stacked=False)
-            if 'Test_Limit_Details' in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Lo_Limit=float(self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]['Test_Limit_Details'][Test_no_name][0])
-            elif 'Test_Limit_Details' not in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Lo_Limit=''
-            if 'Test_Limit_Details' in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Hi_Limit=float(self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]['Test_Limit_Details'][Test_no_name][1])
-            elif 'Test_Limit_Details' not in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Hi_Limit=''
             
+            # Limits
+            if self.Parent_window!=None:
+                if 'Test_Limit_Details' in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Lo_Limit=float(self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]['Test_Limit_Details'][Test_no_name][0])
+                elif 'Test_Limit_Details' not in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Lo_Limit=''
+                if 'Test_Limit_Details' in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Hi_Limit=float(self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]['Test_Limit_Details'][Test_no_name][1])
+                elif 'Test_Limit_Details' not in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Hi_Limit=''
+            elif self.Parent_window==None: Lo_Limit=''; Hi_Limit=''
             Lims=[Lo_Limit,Hi_Limit]
             colors=['b','r']
             Labels=['Lo_Limit','Hi_Limit']
             for li,c,lbl in zip(Lims,colors,Labels):
                 (plt.axvline(x=li, c=c, label= lbl) ) if li!='' else '' #, label= lbl +'= {}'.format(li)
             #plt.title(Test_no_name)
+            if len(List_of_variables_for_grouping)<=9: plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), borderaxespad=0., prop={'size': 10})
+            elif len(List_of_variables_for_grouping)>9: plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), borderaxespad=0., prop={'size': 6})
             return plt
-    def Plot_Line_plot(self,Merged_data,Test_no_name,Grouping_column_name):
-        List_of_variables_for_grouping=[i for i in Merged_data[Grouping_column_name[0]].unique()]
-        #print(List_of_variables_for_grouping)
-        List_of_data_sets={}    
-        for i in range(len(List_of_variables_for_grouping)): List_of_data_sets['Data_'+str(List_of_variables_for_grouping[i])]=Merged_data[Merged_data[Grouping_column_name[0]]==List_of_variables_for_grouping[i]]
+    def Plot_Line_plot(self,Raw_Data,Test_no_name,Grouping_column_name):
+        ''' This Function used to Generate the Line plot if we provide mandotary items Dataframe name, Column name for which we need to plot the 
+        graph and the grouping column if you have any'''
+        if type(Grouping_column_name)==str: Grouping_column_name=[Grouping_column_name]
+        if len(Grouping_column_name)!=0: List_of_variables_for_grouping=[i for i in Raw_Data[Grouping_column_name[0]].unique()]
+        elif len(Grouping_column_name)==0: List_of_variables_for_grouping=[None]
+        # Colour codes to the multiple plots we are using    
         colors=['b','g','r','c','m','y','k']
         symbols=['.','*','+','s','p','D','h','v','o']
-        markers=[color+symbol for symbol in symbols for color in colors]        
-        for i in range(len(List_of_variables_for_grouping)): plt.plot(list(List_of_data_sets['Data_'+str(List_of_variables_for_grouping[i])].index),List_of_data_sets['Data_'+str(List_of_variables_for_grouping[i])][Test_no_name],markers[i],label=List_of_variables_for_grouping[i])
+        plt.xticks( rotation='vertical',fontsize=6)  
+        # Creating the new data table with the name of unique values in the Grouping column name which will help to generate the plot clear
+        List_of_data_sets={}  
+        if len(Grouping_column_name)!=0:
+            for i in range(len(List_of_variables_for_grouping)): List_of_data_sets['Data_'+str(List_of_variables_for_grouping[i])]=Raw_Data[Raw_Data[Grouping_column_name[0]]==List_of_variables_for_grouping[i]]
+        elif len(Grouping_column_name)==0:  List_of_data_sets['Data']=Raw_Data
+        markers=[color+symbol for symbol in symbols for color in colors]    
+        if len(Grouping_column_name)!=0:    
+            for i in range(len(List_of_variables_for_grouping)): plt.plot(list(List_of_data_sets['Data_'+str(List_of_variables_for_grouping[i])].index),List_of_data_sets['Data_'+str(List_of_variables_for_grouping[i])][Test_no_name],markers[i],label=List_of_variables_for_grouping[i])
+        elif len(Grouping_column_name)==0: plt.plot(list(List_of_data_sets['Data'].index),List_of_data_sets['Data'][Test_no_name],markers[0],label=None)
         plt.xticks(rotation='vertical')
         plt.xlabel('Devices')
-        plt.legend()
+        if len(List_of_variables_for_grouping)<=9: plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), borderaxespad=0., prop={'size': 10})
+        elif len(List_of_variables_for_grouping)>9: plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), borderaxespad=0., prop={'size': 6})
+        #plt.legend()
+        if self.Parent_window!=None:
+            if 'Test_Limit_Details' in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Lo_Limit=float(self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]['Test_Limit_Details'][Test_no_name][0])
+            elif 'Test_Limit_Details' not in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Lo_Limit=''
+            if 'Test_Limit_Details' in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Hi_Limit=float(self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]['Test_Limit_Details'][Test_no_name][1])
+            elif 'Test_Limit_Details' not in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Hi_Limit=''
+        elif self.Parent_window==None: 
+            Lo_Limit=''; Hi_Limit=''
+            Lims=[Lo_Limit,Hi_Limit]
+            colors=['b','r']
+            Labels=['Lo_Limit','Hi_Limit']
+            for li,c,lbl in zip(Lims,colors,Labels):
+                (plt.axvline(x=li, c=c, label= lbl) ) if li!='' else ''
         return plt
-    def Plot_BOX_plot(self,Merged_data,Test_no_name,Grouping_column_name):   
 
-        if len(Grouping_column_name)!=0: List_of_variables_for_grouping=[i for i in Merged_data[Grouping_column_name[0]].unique()];boxgroupedx=Grouping_column_name[0]    
+    def Plot_BOX_plot(self,Raw_Data,Test_no_name,Grouping_column_name):
+        ''' This Function used to Generate the Box plot if we provide mandotary items Dataframe name, Column name for which we need to plot the 
+        graph and the grouping column if you have any'''
+        if type(Grouping_column_name)==str: Grouping_column_name=[Grouping_column_name]
+        if len(Grouping_column_name)!=0:
+            List_of_variables_for_grouping=[i for i in Raw_Data[Grouping_column_name[0]].unique()]
+            boxgroupedx= Grouping_column_name[1] if len(Grouping_column_name)>1 else Grouping_column_name[0]    
         elif len(Grouping_column_name)==0: List_of_variables_for_grouping=[None];boxgroupedx=None
-        boxgroupedx=Grouping_column_name[0]
-        if (len(List_of_variables_for_grouping)==1 and List_of_variables_for_grouping[0]=='') or (len(List_of_variables_for_grouping)==1 and List_of_variables_for_grouping[0]!=""): box=sabrn.boxplot(data=Merged_data,x=boxgroupedx, y=Test_no_name,width=0.5)
-        elif len(List_of_variables_for_grouping)>1: box=sabrn.boxplot(data=Merged_data,x=boxgroupedx, y=Test_no_name,hue=boxgroupedx,width=0.5)
+        if (len(List_of_variables_for_grouping)==1 and List_of_variables_for_grouping[0]=='') or (len(List_of_variables_for_grouping)==1 and List_of_variables_for_grouping[0]!=""): box=sabrn.boxplot(data=Raw_Data,x=boxgroupedx, y=Test_no_name,width=0.5)
+        elif len(List_of_variables_for_grouping)>1: box=sabrn.boxplot(data=Raw_Data,x=Grouping_column_name[0], y=Test_no_name,hue=boxgroupedx,width=0.5)
         if len(List_of_variables_for_grouping)<=9: plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), borderaxespad=0., prop={'size': 10})
         elif len(List_of_variables_for_grouping)>9: plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), borderaxespad=0., prop={'size': 6})
         box.set(xlabel='',ylabel='')
         #plt.title('Box plot')
         plt.xticks(rotation='horizontal',fontsize=6)
-        plt.legend()
+        #plt.legend()
+        if self.Parent_window!=None:
+            if 'Test_Limit_Details' in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Lo_Limit=float(self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]['Test_Limit_Details'][Test_no_name][0])
+            elif 'Test_Limit_Details' not in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Lo_Limit=''
+            if 'Test_Limit_Details' in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Hi_Limit=float(self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]['Test_Limit_Details'][Test_no_name][1])
+            elif 'Test_Limit_Details' not in self.Parent_window.Loaded_Data_Files[self.Data_Table_Name]: Hi_Limit=''
+        elif self.Parent_window==None: 
+            Lo_Limit=''; Hi_Limit=''
+            Lims=[Lo_Limit,Hi_Limit]
+            colors=['b','r']
+            Labels=['Lo_Limit','Hi_Limit']
+            for li,c,lbl in zip(Lims,colors,Labels):
+                (plt.axvline(x=li, c=c, label= lbl) ) if li!='' else ''
         return plt
+
     def rearrange(PVT_corners, data):
         rearranged_data = []
         data_len = len(data)
@@ -135,10 +187,11 @@ class generate_plots_with_summary_table:
         return plt
 
     def Get_the_header_table(self,loop_count,test_number):
-        Table6=['TESSOLVE SEMICONDUCTOR PVT LTD',"PageNumber"]
+        Table6=['GOURISANKAR_TOOL',"PageNumber"]
         Table7=[['Characterization Report',loop_count]]
         TestNumber=test_number
-        Header_table= plt.table(cellText=Table7,colLabels=Table6,cellLoc='center',colLoc='center',loc='top',bbox=[-0.01,3.7,1.2,0.15])
+        bbox_val= [-0.08, 1.06,1.2,0.08] if self.Numberofplotsinpdf==1 else ( [-0.08, 2.32,1.2,0.15] if self.Numberofplotsinpdf==2 else [-0.08, 3.61,1.2,0.22])
+        Header_table= plt.table(cellText=Table7,colLabels=Table6,cellLoc='center',colLoc='center',loc='top',bbox=bbox_val)#[-0.08,1.06,1.2,0.08]
         Header_table.set_fontsize(16)
         Header_table.scale(2.6,2.6)
         Header_table.auto_set_font_size(False)
@@ -170,7 +223,8 @@ class generate_plots_with_summary_table:
     def Get_the_summary_table(self,Summary_table,Test_no_name,table_column_header):
         Summary_table_=Summary_table.transpose()
         c=[0.1 if i==0 else 0.05 for i in range(len(list(table_column_header)))]
-        Data_tbl=plt.table(cellText=[Summary_table_[Test_no_name].values],colWidths=c, colLabels=list(table_column_header),cellLoc='left',colLoc='left',loc='bottom',bbox=[-0.08,-0.6,1.2,0.3])
+        bbox_val=[-0.08,-0.25,1.2,0.1] if self.Numberofplotsinpdf==1 else [-0.08,-0.6,1.2,0.3]
+        Data_tbl=plt.table(cellText=[Summary_table_[Test_no_name].values],colWidths=c, colLabels=list(table_column_header),cellLoc='left',colLoc='left',loc='bottom',bbox=bbox_val)
         Data_tbl.auto_set_font_size(False)
         Data_tbl.set_fontsize(20)
         Data_tbl.auto_set_column_width(True)
@@ -210,6 +264,10 @@ class generate_plots_with_summary_table:
             k=QMessageBox.information('Generation aborted!','Sorry :( Found some issue in Generating the Summary table',QMessageBox.Ok,QMessageBox.Ok)
             print('Line Number or Loop Number is ',i,Test_no_name_list[i])
             self.close()
+    #def CP(self,DataTable,Test_number_list):
+
+    
+    
     def Generate_summary_table(self,Data_Table,Test_number_list,Summary_Stat_list):
         ''' This Function takes the data frame and test number list as input and creates the statistic summary table for the same'''
         Data_Table_=Data_Table
@@ -269,10 +327,10 @@ class generate_plots_with_summary_table:
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             outputfilename, sav_type = QFileDialog.getSaveFileName(caption='Export file',directory='',filter="PDF File (*.pdf)", options=options)
-            Numberofplotsinpdf=len(Plots_List_)
+            self.Numberofplotsinpdf=len(Plots_List_)
             Summary_table,Summary_header=self.Generate_summary_table(Data_Table=self.Raw_Data,Test_number_list=Test_number_list_,Summary_Stat_list=Summary_Stat_list_)
             
-            if Numberofplotsinpdf>=1:
+            if self.Numberofplotsinpdf>=1:
                 pdf_pages = PdfPages(outputfilename+'.pdf')
                 with pdf_pages as pdf:
                     Loop_count=0
@@ -280,9 +338,9 @@ class generate_plots_with_summary_table:
                         Loop_count+=1
                         if self.Raw_Data[i].dtype=='float' or self.Raw_Data[i].dtype=='int64':
                             
-                            if Numberofplotsinpdf==1:
-                                fig = plt.figure(figsize=(20,14))
-                                #plt.subplot(1,1,1)
+                            '''if Numberofplotsinpdf==1:
+                                plt.figure(figsize=(20,20))
+                                plt.subplot(1,1,1)
                                 if 'Box Plot' in Plots_List_:
                                     Table_attached=False
                                     self.Plot_BOX_plot(self.Raw_Data,i,Group_by_variable)
@@ -292,33 +350,34 @@ class generate_plots_with_summary_table:
                                 elif 'Line Plot' in Plots_List_:
                                     #plt.subplot(2,1,plt_count);plt_count+=1
                                     self.Plot_Line_plot(self.Raw_Data,i,Group_by_variable)
+                                plt.subplots_adjust(left=0.1, right=0.85,top=0.9,bottom=0.2)
                             elif Numberofplotsinpdf==2:                                
-                                fig = plt.figure(figsize=(20,14))
+                                plt.figure(figsize=(20,20))
                                 plt_count=1
                                 if 'Box Plot' in Plots_List_:
-                                    plt.subplot(2,1,plt_count);plt_count+=1
+                                    plt.subplot(Numberofplotsinpdf,1,plt_count);plt_count+=1
                                     self.Plot_BOX_plot(self.Raw_Data,i,Group_by_variable)
                                 if  'Histogram' in Plots_List_:
-                                    plt.subplot(2,1,plt_count);plt_count+=1
+                                    plt.subplot(Numberofplotsinpdf,1,plt_count);plt_count+=1
                                     self.Plot_Histogram(self.Raw_Data,Group_by_variable,i)
                                 if  'Line Plot' in Plots_List_:
-                                    plt.subplot(2,1,plt_count);plt_count+=1
+                                    plt.subplot(Numberofplotsinpdf,1,plt_count);plt_count+=1
                                     self.Plot_Line_plot(self.Raw_Data,i,Group_by_variable)    
                                 plt.subplots_adjust(left=0.1, right=0.85,top=0.89,bottom=0.2)
-                            elif  Numberofplotsinpdf==3:
-                                fig = plt.figure(figsize=(20,20))                        
-                                #imgplot = plt.imshow('icon_uPN_icon.ico')
-                                plt_count=1
-                                if 'Box Plot' in Plots_List_:
-                                    plt.subplot(Numberofplotsinpdf,1,plt_count);plt_count+=1
-                                    self.Plot_BOX_plot(self.Raw_Data,i,Group_by_variable)
-                                if  'Histogram' in Plots_List_:
-                                    plt.subplot(Numberofplotsinpdf,1,plt_count);plt_count+=1
-                                    self.Plot_Histogram(self.Raw_Data,Group_by_variable,i)
-                                if  'Line Plot' in Plots_List_:
-                                    plt.subplot(Numberofplotsinpdf,1,plt_count);plt_count+=1
-                                    self.Plot_Line_plot(self.Raw_Data,i,Group_by_variable)
-                                plt.subplots_adjust(left=0.1, right=0.85,top=0.9,bottom=0.2)     
+                            elif  Numberofplotsinpdf==3:'''
+                            fig = plt.figure(figsize=(20,20))                        
+                            #imgplot = plt.imshow('icon_uPN_icon.ico')
+                            plt_count=1
+                            if 'Box Plot' in Plots_List_:
+                                plt.subplot(self.Numberofplotsinpdf,1,plt_count);plt_count+=1
+                                self.Plot_BOX_plot(self.Raw_Data,i,Group_by_variable)
+                            if  'Histogram' in Plots_List_:
+                                plt.subplot(self.Numberofplotsinpdf,1,plt_count);plt_count+=1
+                                self.Plot_Histogram(self.Raw_Data,Group_by_variable,i)
+                            if  'Line Plot' in Plots_List_:
+                                plt.subplot(self.Numberofplotsinpdf,1,plt_count);plt_count+=1
+                                self.Plot_Line_plot(self.Raw_Data,i,Group_by_variable)
+                            plt.subplots_adjust(left=0.1, right=0.85,top=0.9,bottom=0.2)     
                             #Header
                             #tb=list(Summary_table.loc(i))
                             #DataTable=plt.table(cellText=tb,colWidths=c,colLabels=Summary_header,cellLoc='left',colLoc='left',loc='bottom',bbox=[-0.08,-0.4,1.2,0.3])

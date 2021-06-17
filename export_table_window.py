@@ -61,13 +61,23 @@ class Ui_Export_Table_Window(object):
         options |= QFileDialog.DontUseNativeDialog
         fileName, sav_type = QFileDialog.getSaveFileName(caption='Export file',directory='',filter="CSV File (*.csv);;Excel File (*.xls *.xlsx);;Text File (*.txt)", options=options) #;;All Files (*.*)
         if fileName and self.Parent_window!=None:
-            self.Data=DF(self.Parent_window.Loaded_Data_File_Raw_Data[self.Loaded_File_List_Combo.currentText()])
+            self.Data=DF(self.Parent_window.Loaded_Data_File_Raw_Data[self.Loaded_File_List_Combo.currentText()])            
             if sav_type=='CSV File (*.csv)':
-                self.Data.to_csv(fileName+'.csv')
+                self.Data.to_csv(fileName+'.csv',index=False)                
             elif sav_type=='Excel File (*.xls *.xlsx)':
-                self.Data.to_excel(fileName+'.xlsx')
+                self.Data.to_excel(fileName+'.xlsx',index=False)                
             elif sav_type=='Text File (*.txt)':
-                self.Data.to_csv(fileName+'.txt', header=True, index=None,sep='\t')
+                self.Data.to_csv(fileName+'.txt', header=True, index=None,sep='\t')                
+            try:
+                self.Limit_file=DF(self.Parent_window.Loaded_Data_Files[self.Loaded_File_List_Combo.currentText()]['Test_Limit_Details'])
+                if sav_type=='CSV File (*.csv)':               
+                    self.Limit_file.to_csv(fileName+'_Limits'+'.csv',index=False)
+                elif sav_type=='Excel File (*.xls *.xlsx)':                
+                    self.Limit_file.to_excel(fileName+'_Limits'+'.xlsx',index=False)
+                elif sav_type=='Text File (*.txt)':
+                    self.Limit_file.to_csv(fileName+'_Limits'+'.txt', header=True, index=None,sep='\t')
+            except:
+                pass
         self.Close_Export_Window()
             
 if __name__ == "__main__":

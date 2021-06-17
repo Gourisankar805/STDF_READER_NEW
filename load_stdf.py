@@ -1,7 +1,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QInputDialog,QFileDialog,QMessageBox,QWidget)
-from rev003p7_finalysing_stdf_reader import READ_THE_STDF_FILE
+from rev003p9_finalysing_stdf_reader import READ_THE_STDF_FILE
 from excel_sheet_selector import Ui_Sheet_selector
 import time,sys
 import pandas as pd
@@ -105,12 +105,11 @@ class Ui_Load_STDF( QtWidgets.QDialog):
     def Load_Action(self):
         '''Sends the input name to main windows'''        
         if self.File_name!=None:
-            
             if self.File_Type=="STDF Files (*.std *.stdf)":
                 self.Raw_Data=READ_THE_STDF_FILE(parent=self)
                 self.Raw_Data.Start_process(self.File_name,Load_STDF1)
                 self.Store_the_Data()
-                #Load_STDF1.close()  
+                #Load_STDF1.close()
             elif self.File_Type=="Excel Files (*.xlsx *.xls)":
                 self.Load_the_excel_file(self.File_name)
             elif self.File_Type=="CSV Files (*.csv)":
@@ -121,6 +120,7 @@ class Ui_Load_STDF( QtWidgets.QDialog):
             
             Load_STDF1.close()           
         else:
+            
             self.Messagebox('Please select the file then try to load','warn','Please browse the file')
         #self.quit()
     def Load_the_excel_file(self,filepath):

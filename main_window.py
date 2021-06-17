@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QInputDialog,QFileDialog,QMessageBox,QWidget,QMainWindow,QDialog,QTabWidget,QSizePolicy,QTableWidget,QHBoxLayout,QGridLayout,QTableWidgetItem,QDesktopWidget,QVBoxLayout)
 from PyQt5.QtGui import QIcon,QMoveEvent
 from PyQt5.QtCore import QAbstractTableModel, Qt
+import pandas as pd
 from pandas import DataFrame as DF
 import os,sys
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -14,6 +15,7 @@ from data_table_properties_window import Ui_Data_Table_Properties_Window
 from export_table_window import Ui_Export_Table_Window
 from merge_tables_window import Ui_Insert_Rows,Ui_Insert_Rows_Mismatched_column_window
 from select_items_to_plot_window import Ui_Selected_items_to_plot
+from yield_report_generation_window import Ui_Yiled_Report_Generation_form
 
 class table_view_model(QAbstractTableModel):
     ''' This function takes the data frame as input and converts the data frame into QTable Model. '''
@@ -55,6 +57,7 @@ class Ui_MainWindow(QMainWindow):
         self.File_Table_List={}
         self.Gridlayout_list_pertab={}
         self.Parametric_Summary_Table_count=0
+        self.Cancel_buttion_clicked_in_plot_generation=False
     def setupUi(self, MainWindow):
         #global Main_Window
         #QMainWindow.__init__(self)
@@ -86,6 +89,7 @@ class Ui_MainWindow(QMainWindow):
         self.tabWidget.setCornerWidget(self.Add_Tab_button_plus1,QtCore.Qt.TopRightCorner)
         self.Add_Tab_button_plus.clicked.connect(self.Add_Tab)
         self.Add_Tab_button_plus1.clicked.connect(self.Add_Tab)
+        
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -121,7 +125,6 @@ class Ui_MainWindow(QMainWindow):
         self.Open_From.triggered.connect(self.Open_Load_Action)
         self.Open_From.setText('Open_From')
         self.Open_From.setShortcut('Ctrl+O')
-
         self.Menu = QtWidgets.QMenu(self.menubar)
         self.Menu.setObjectName("Menu")
         self.MarkedRows = QtWidgets.QMenu(self.Menu)
@@ -258,6 +261,8 @@ class Ui_MainWindow(QMainWindow):
         self.actionMeasuement_System_Comparision_MSC_Analysis.setObjectName("actionMeasuement_System_Comparision_MSC_Analysis")
         self.actionSPC_Statistical_Process_Controll = QtWidgets.QAction(self.Main_Window)
         self.actionSPC_Statistical_Process_Controll.setObjectName("actionSPC_Statistical_Process_Controll")
+        self.Yield_report = QtWidgets.QAction(self.Main_Window)
+        self.Yield_report.setObjectName("Yield_Report")
         self.actionFrequency_Pareto = QtWidgets.QAction(self.Main_Window)
         self.actionFrequency_Pareto.setObjectName("actionFrequency_Pareto")
         self.actionClose = QtWidgets.QAction(self.Main_Window)
@@ -346,6 +351,8 @@ class Ui_MainWindow(QMainWindow):
         self.Analysis.addAction(self.actionAnalysis_of_Varicance)
         self.Analysis.addAction(self.actionMeasuement_System_Comparision_MSC_Analysis)
         self.Analysis.addAction(self.actionSPC_Statistical_Process_Controll)
+        self.Analysis.addAction(self.Yield_report)
+        self.Yield_report.triggered.connect(self.Open_Yiled_Report_window)
         self.Analysis.addAction(self.actionFrequency_Pareto)
         self.Tools.addAction(self.actionFind)
         self.Tools.addSeparator()
@@ -360,7 +367,7 @@ class Ui_MainWindow(QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(self.Main_Window)
     def retranslateUi(self,Main_Window):
         _translate = QtCore.QCoreApplication.translate
-        self.Main_Window.setWindowTitle(_translate("MainWindow", "TESSOLVE_TOOL"))
+        self.Main_Window.setWindowTitle(_translate("MainWindow", "GOURISANKAR_TOOL"))
         self.File.setTitle(_translate("MainWindow", "File"))
         #self.Export.setTitle(_translate("MainWindow", "Export"))
         #self.Open_From.setTitle(_translate("MainWindow", "Open From"))
@@ -423,6 +430,7 @@ class Ui_MainWindow(QMainWindow):
         self.actionAnalysis_of_Varicance.setText(_translate("MainWindow", "Analysis of Varicance"))
         self.actionMeasuement_System_Comparision_MSC_Analysis.setText(_translate("MainWindow", "Measuement System Comparision ( MSC) Analysis"))
         self.actionSPC_Statistical_Process_Controll.setText(_translate("MainWindow", "Statistical Process Control ( SPC)"))
+        self.Yield_report.setText(_translate("MainWindow", "Yield Report Generation"))
         self.actionFrequency_Pareto.setText(_translate("MainWindow", "Frequency Pareto"))
         self.actionClose.setText(_translate("MainWindow", "Close"))
         self.actionAdd_Data_Table.setText(_translate("MainWindow", "Add Data Table"))
@@ -457,29 +465,29 @@ class Ui_MainWindow(QMainWindow):
         self.Add_plot_dialog.exec_()
         ## Dynamic plot##
         # a figure instance to plot on
-        self.figure = plt.figure()
-        # this is the Canvas Widget that displays the `figure`
-        # it takes the `figure` instance as a parameter to __init__
-        self.canvas = FigureCanvas(self.figure)
-        # this is the Navigation widget
-        # it takes the Canvas widget and a parent
-        self.toolbar = NavigationToolbar(self.canvas, self)
-        # Just some button connected to `plot` method
-        self.button = QtWidgets.QPushButton('Plot')
-        self.button.clicked.connect(self.plot)
-        # set the layout
-        self.Add_Tab()
-        layout = QVBoxLayout(self.Tab_List[len(self.Tab_List)-1])
-        layout.addWidget(self.toolbar)
-        layout.addWidget(self.canvas)
-        layout.addWidget(self.button)
-        self.plot()
-        #self.Tab_List[len(self.Tab_List)-1].setLayout(layout)
-        #self.setLayout(layout)
+        if self.Cancel_buttion_clicked_in_plot_generation==True:
+            self.figure = plt.figure()
+            # this is the Canvas Widget that displays the `figure`
+            # it takes the `figure` instance as a parameter to __init__
+            self.canvas = FigureCanvas(self.figure)
+            # this is the Navigation widget
+            # it takes the Canvas widget and a parent
+            self.toolbar = NavigationToolbar(self.canvas, self)
+            # Just some button connected to `plot` method
+            self.button = QtWidgets.QPushButton('Plot')
+            self.button.clicked.connect(self.plot)
+            # set the layout
+            self.Add_Tab()
+            layout = QVBoxLayout(self.Tab_List[len(self.Tab_List)-1])
+            layout.addWidget(self.toolbar)
+            layout.addWidget(self.canvas)
+            layout.addWidget(self.button)
+            self.plot()
+            #self.Tab_List[len(self.Tab_List)-1].setLayout(layout)
+            #self.setLayout(layout)
     def plot(self):
         ''' plot some random stuff '''
         # random data
-        
         New_File_Name='Parametric_Summary_Table'+str(self.Parametric_Summary_Table_count)
         Test_names=list(self.Loaded_Data_File_Raw_Data['Parametric_Summary_Table1']['Name'])
         # instead of ax.hold(False)
@@ -499,7 +507,7 @@ class Ui_MainWindow(QMainWindow):
         if len(self.Loaded_Data_File_count)>=len(self.Table_List) and len(self.Loaded_Data_File_count)!=0:
             if len(self.Tab_List)==0:
                 self.Add_Tab()
-                self.tabWidget.setCurrentIndex(0)            
+                self.tabWidget.setCurrentIndex(0)
             if self.Tab_List[self.tabWidget.currentIndex()] not in self.Gridlayout_list_pertab.keys():
                 self.Gridlayout_list_pertab[self.Tab_List[self.tabWidget.currentIndex()]]=QtWidgets.QGridLayout(self.Tab_List[self.tabWidget.currentIndex()])
             self.Convert_Loaded_data_to_data_table()
@@ -515,7 +523,7 @@ class Ui_MainWindow(QMainWindow):
         new_item=new_item
         item_exist=False
         if new_item!="" :
-            for i in range(0,Combo_list.count()):            
+            for i in range(0,Combo_list.count()):
                 if Combo_list.itemText(i)==new_item:
                     item_exist=True
                     break
@@ -526,7 +534,7 @@ class Ui_MainWindow(QMainWindow):
         Table.setColumnCount(self.Column_Count)
         Table.setRowCount(self.Row_count)
         ## Adding the Header values
-        self.Header_values=[]        
+        self.Header_values=[]
         for column,key in enumerate(self.Loaded_Data_Files[self.Loaded_Data_File_count[len(self.Loaded_Data_File_count)-1]]['Full_Rec_Summary']):
             self.Header_values.append(key)
             for row, item in enumerate(self.Loaded_Data_Files[self.Loaded_Data_File_count[len(self.Loaded_Data_File_count)-1]]['Full_Rec_Summary'][key]):
@@ -540,7 +548,7 @@ class Ui_MainWindow(QMainWindow):
         self.Tab_List.remove(self.Tab_List[self.tabWidget.currentIndex()])
         self.tabWidget.removeTab(self.tabWidget.currentIndex())
     def Add_Tool_Bar(self):
-        ''' Adds the Icons and actions the created tool bar'''       
+        ''' Adds the Icons and actions the created tool bar'''
         icon_foldername=os.path.dirname(os.path.realpath(__file__))+"\\Icons\\" 
         self.Tool_Bar=self.Main_Window.addToolBar('ToolBar')        
         self.Add_Data_Table_Icon = QtWidgets.QAction(self.Main_Window)
@@ -551,7 +559,7 @@ class Ui_MainWindow(QMainWindow):
 
         self.Export_Data_Table_Icon = QtWidgets.QAction(self.Main_Window)
         self.Export_Data_Table_Icon.setObjectName("actionExit")
-        #self.Export_Data_Table_Icon.triggered.connect(self.Add_Table)
+        self.Export_Data_Table_Icon.triggered.connect(self.Open_Export_Window)
         self.Export_Data_Table_Icon.setIcon(QtGui.QIcon(icon_foldername+"Export_Data_Table.png"))
         self.Tool_Bar.addAction(self.Export_Data_Table_Icon)
         
@@ -563,9 +571,15 @@ class Ui_MainWindow(QMainWindow):
 
         self.Load_File_Icon = QtWidgets.QAction(self.Main_Window)        
         self.Load_File_Icon.setObjectName("actionExit")
-        #self.Load_File_Icon.triggered.connect()
+        self.Load_File_Icon.triggered.connect(self.Open_Load_Action)
         self.Load_File_Icon.setIcon(QtGui.QIcon(icon_foldername+"Load_File.png"))
         self.Tool_Bar.addAction(self.Load_File_Icon)
+
+        self.Yield_Report_Icon = QtWidgets.QAction(self.Main_Window)        
+        self.Yield_Report_Icon.setObjectName("actionExit")
+        self.Yield_Report_Icon.triggered.connect(self.Open_Yiled_Report_window)
+        self.Yield_Report_Icon.setIcon(QtGui.QIcon(icon_foldername+"Yield_report.png"))
+        self.Tool_Bar.addAction(self.Yield_Report_Icon)
     def Open_Load_Action(self):
         '''Opens the Load window and send the File name selected in load window to this main window, using the QtCore.pyqtsignal.'''        
         self.Load_STDF = QtWidgets.QDialog()
@@ -608,10 +622,10 @@ class Ui_MainWindow(QMainWindow):
         elif msgtype=='criti':
             reply=QMessageBox.critical(self,title,msg_text,QMessageBox.Ok | QMessageBox.Cancel ,QMessageBox.Ok)
         return reply
-    def resizeEvent(self, event):  # QResizeEvent
+    def resizeEvent(self, event):# QResizeEvent
         print("w=`{}`, h=`{}`".format(event.size().width(), event.size().height())) 
         #super(Ui_MainWindow, self).resizeEvent(event)
-    def moveEvent(self, event):    # QMoveEvent
+    def moveEvent(self, event):# QMoveEvent
         print("x=`{}`, y=`{}`".format(event.pos().x(), event.pos().y()))
         #super(Ui_MainWindow, self).moveEvent(event)
     def Open_Insert_Rows_window(self):
@@ -621,6 +635,14 @@ class Ui_MainWindow(QMainWindow):
         self.Insert_Rows_Window.setupUi(self.Insert_Rows)
         self.Insert_Rows_Window.Get_the_loaded_file_details()
         self.Insert_Rows.exec_()
+        self.Refresh_data_table_items()
+    def Open_Yiled_Report_window(self):
+        '''Opens the Merge table window'''
+        self.Yield_report = QtWidgets.QDialog()
+        self.Yield_report_Window = Ui_Yiled_Report_Generation_form(self)
+        self.Yield_report_Window.setupUi(self.Yield_report)
+        self.Yield_report_Window.Get_the_loaded_file_details()
+        self.Yield_report.exec_()
         self.Refresh_data_table_items()
     def Refresh_data_table_items(self):
         ''' Refresh data in the data table, '''
@@ -648,16 +670,25 @@ class Ui_MainWindow(QMainWindow):
                     self.File_Table_List[item].setFocusPolicy(QtCore.Qt.NoFocus)
                     self.File_Table_List[item].setObjectName("Table"+str(len(self.Table_List)-1))
                     self.File_Table_List[item].resize
+                    self.Loaded_Data_File_Raw_Data[item]=self.Loaded_Data_File_Raw_Data[item].sort_index(axis=1, level=None, ascending=False, inplace=False, kind='quicksort', na_position='last', sort_remaining=True, by=None)
                     self.modle=table_view_model(self.Loaded_Data_File_Raw_Data[item])
                     self.File_Table_List[item].setModel(self.modle)
                     #self.File_Table_List[item].show()
                 #self.Write_raw_data_into_data_table(self.File_Table_List[item],self.Loaded_Data_File_Raw_Data[item])'''
-
+    def Summary_table_funs(self):
+        ''' Give the summary table based on the data selected'''
+        kkk=pd.pivot_table(self.Loaded_Data_File_Raw_Data['File_1'],values='HardBin',index=['Hbin_nam'],columns=['File_Name'],aggfunc=np.count_nonzero)
+    def Export_all_Record_details_in_the_file(self):
+        for i in self.Loaded_Data_Files['File_1'].keys():
+            kk=self.Loaded_Data_Files['File_1'][i]
+            kk2=DF(kk)
+            kk2.to_csv('%s.csv'%i,index=False)
+        print('All Records exported')
 if __name__ == "__main__":
     import sys
     Main_Application = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()    
+    MainWindow = QtWidgets.QMainWindow()
     ui_Main_Window = Ui_MainWindow()
-    ui_Main_Window.setupUi(MainWindow) 
+    ui_Main_Window.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(Main_Application.exec_())

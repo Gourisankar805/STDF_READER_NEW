@@ -124,7 +124,7 @@ class App2(QWidget):
         plt.legend()
         return plt
     def Get_the_header_table(self,loop_count):
-        Table6=['TESSOLVE SEMICONDUCTOR PVT LTD',"PageNumber"]
+        Table6=['GOURISANKAR REPORT',"PageNumber"]
         Table7=[['Characterization Report',loop_count]]
         Header_table= plt.table(cellText=Table7,colLabels=Table6,cellLoc='center',colLoc='center',loc='top',bbox=[-0.01, 2.32,1.2,0.15])
         Header_table.set_fontsize(16)
