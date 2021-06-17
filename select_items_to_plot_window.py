@@ -221,9 +221,7 @@ class Ui_Selected_items_to_plot(object):
         QtCore.QMetaObject.connectSlotsByName(Selected_items_to_plot)
     def Close_window(self):        
         ''' Closes the Active window'''
-        if self.Parent_window==True : self.Parent_window.Cancel_buttion_clicked_in_plot_generation=True
         self.Selected_items_to_plot1.close()
-        
     def get_the_loaded_Datatables_details(self):
         ''' Will take the Pandas Data Frame from the parent window and takes the file names and adds to the combo box.
             Shows the column values into the lists'''
@@ -351,7 +349,7 @@ class Ui_Selected_items_to_plot(object):
         self.Generate_report=generate_plots_with_summary_table(self.Parent_window)
         self.Generate_report.Generate_plots(data_table_name= self.Current_data_table_name,
         test_number_list=self.selected_Test_Number_list_items,summary_stat_list=self.selected_Test_Number_list_Summary_Stat_items,plot_list=self.selected_Test_Number_list_Graphs_items,group_by_varible_list= self.selected_Test_Number_list_group_by_column)
-        self.Close_window()
+        
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)

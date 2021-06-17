@@ -55,7 +55,6 @@ class Ui_MainWindow(QMainWindow):
         self.File_Table_List={}
         self.Gridlayout_list_pertab={}
         self.Parametric_Summary_Table_count=0
-        self.Cancel_buttion_clicked_in_plot_generation=False
     def setupUi(self, MainWindow):
         #global Main_Window
         #QMainWindow.__init__(self)
@@ -458,29 +457,29 @@ class Ui_MainWindow(QMainWindow):
         self.Add_plot_dialog.exec_()
         ## Dynamic plot##
         # a figure instance to plot on
-        if self.Cancel_buttion_clicked_in_plot_generation==True:
-            self.figure = plt.figure()
-            # this is the Canvas Widget that displays the `figure`
-            # it takes the `figure` instance as a parameter to __init__
-            self.canvas = FigureCanvas(self.figure)
-            # this is the Navigation widget
-            # it takes the Canvas widget and a parent
-            self.toolbar = NavigationToolbar(self.canvas, self)
-            # Just some button connected to `plot` method
-            self.button = QtWidgets.QPushButton('Plot')
-            self.button.clicked.connect(self.plot)
-            # set the layout
-            self.Add_Tab()
-            layout = QVBoxLayout(self.Tab_List[len(self.Tab_List)-1])
-            layout.addWidget(self.toolbar)
-            layout.addWidget(self.canvas)
-            layout.addWidget(self.button)
-            self.plot()
-            #self.Tab_List[len(self.Tab_List)-1].setLayout(layout)
-            #self.setLayout(layout)
+        self.figure = plt.figure()
+        # this is the Canvas Widget that displays the `figure`
+        # it takes the `figure` instance as a parameter to __init__
+        self.canvas = FigureCanvas(self.figure)
+        # this is the Navigation widget
+        # it takes the Canvas widget and a parent
+        self.toolbar = NavigationToolbar(self.canvas, self)
+        # Just some button connected to `plot` method
+        self.button = QtWidgets.QPushButton('Plot')
+        self.button.clicked.connect(self.plot)
+        # set the layout
+        self.Add_Tab()
+        layout = QVBoxLayout(self.Tab_List[len(self.Tab_List)-1])
+        layout.addWidget(self.toolbar)
+        layout.addWidget(self.canvas)
+        layout.addWidget(self.button)
+        self.plot()
+        #self.Tab_List[len(self.Tab_List)-1].setLayout(layout)
+        #self.setLayout(layout)
     def plot(self):
         ''' plot some random stuff '''
         # random data
+        
         New_File_Name='Parametric_Summary_Table'+str(self.Parametric_Summary_Table_count)
         Test_names=list(self.Loaded_Data_File_Raw_Data['Parametric_Summary_Table1']['Name'])
         # instead of ax.hold(False)
@@ -609,10 +608,10 @@ class Ui_MainWindow(QMainWindow):
         elif msgtype=='criti':
             reply=QMessageBox.critical(self,title,msg_text,QMessageBox.Ok | QMessageBox.Cancel ,QMessageBox.Ok)
         return reply
-    def resizeEvent(self, event):# QResizeEvent
+    def resizeEvent(self, event):  # QResizeEvent
         print("w=`{}`, h=`{}`".format(event.size().width(), event.size().height())) 
         #super(Ui_MainWindow, self).resizeEvent(event)
-    def moveEvent(self, event):# QMoveEvent
+    def moveEvent(self, event):    # QMoveEvent
         print("x=`{}`, y=`{}`".format(event.pos().x(), event.pos().y()))
         #super(Ui_MainWindow, self).moveEvent(event)
     def Open_Insert_Rows_window(self):
@@ -657,8 +656,8 @@ class Ui_MainWindow(QMainWindow):
 if __name__ == "__main__":
     import sys
     Main_Application = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
+    MainWindow = QtWidgets.QMainWindow()    
     ui_Main_Window = Ui_MainWindow()
-    ui_Main_Window.setupUi(MainWindow)
+    ui_Main_Window.setupUi(MainWindow) 
     MainWindow.show()
     sys.exit(Main_Application.exec_())
